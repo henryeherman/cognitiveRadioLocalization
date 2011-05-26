@@ -1,0 +1,109 @@
+RSSI (AND LQI) MEASUREMENTS
+
+In all the measurements, when the nodes were equipped with the external antenna (EXT ANT) we took into account its gain.
+Instead we do not know the pattern of the integrated antenna (INT ANT).
+To estimate the channel parameters K and eta we use the following equation
+
+P_rx = P_tx + K_d0 - 10*eta*log10(d/d0)
+
+where P_tx = -1 [dBm], d0 is the reference distance to be in far field condition (10 [cm] in our studies) and P_rx [dBm], i.e. the RSSI samples, is the received power (already adjusted according to the Tmote sky RSSI offset and, if necessary, the external antenna gain).
+
+####################
+# antenna_test.mat #
+####################	
+RSSI samples collected from a couple of nodes, one in central position and the other ringing around that.
+
+rssi_c (360x3x23): the nodes (INT ANT) were kept at the same orientation rotating the outer node with the central node.
+rssi_d (360x3x23): the central node (INT ANT) was kept stationary while the second (INT ANT) ringed around it.
+rssi_a (360x3x23): the central node (EXT ANT) was kept stationary while the second (INT ANT) ringed around it.
+
+10 samples for every position (0:10:350[degree], 20:10:240[cm])
+rssi_x(:,1,j) = degree/10 
+rssi_x(:,2,j) = RSSI nodeA-->nodeB
+rssi_x(:,3,j) = RSSI nodeB-->nodeA
+distance between tx and rx: (j*10+10)[cm]
+
+#######################
+# timeVSfreq_data.mat #
+#######################
+RSSI samples collected from 4 nodes (EXT ANT) in 24 positions.
+===================================================
+Nodes' positions:
+
+
+		°		°	^
+					|
+° °					[cm]
+° °	... 	°		°	|
+					|
+----------------[cm]---------------->	|
+===================================================
+We wanted to observe the effects of averaging the RSSI samples over TIME or over FREQ.
+
+rssi_4_nodes (23040x7):
+rssi_4_nodes(:,1) = timestamp (in the same istant we collected the RSSI samples from the 12 couples of nodes over the 16 channel. Different timestamps stand for samples taken some minute later)
+rssi_4_nodes(:,2) = tx id
+rssi_4_nodes(:,3) = rx id
+rssi_4_nodes(:,4) = channel id
+rssi_4_nodes(:,5) = RSSI (tx-->rx)
+rssi_4_nodes(:,6) = LQI (tx-->rx)
+rssi_4_nodes(:,7) = distance [m] between tx and rx
+
+
+###################
+# indoor_data.mat #
+###################
+RSSI samples collected from 8 nodes (EXT ANT), 7 fixed and 1 mobile (50 positions).
+indoor (112x12x50)
+indoor (:,1,:) = tx id
+indoor (:,2,:) = rx id
+indoor (:,3,:) = channel id
+indoor (:,4,:) = RSSI (tx-->rx)
+indoor (:,5,:) = RSSI (rx-->tx)
+indoor (:,6,:) = LQI (tx-->rx)
+indoor (:,7,:) = LQI (rx-->tx)
+indoor (:,8:9,:) = tx (x_coord,y_coord) [m]
+indoor (:,10:11,:) = rx (x_coord,y_coord) [m]
+indoor (:,12,:) = distance [m] between tx and rx
+
+
+
+##################
+# aisle_data.mat #
+##################
+RSSI samples collected from 6 nodes (EXT ANT), 5 fixed and 1 mobile.
+fixed (320x12): inter-fixed-node data
+mobile (2080x12): mobile-fixed data
+
+X (:,1,:) = tx id
+X (:,2,:) = rx id
+X (:,3,:) = channel id
+X (:,4,:) = RSSI (tx-->rx)
+X (:,5,:) = RSSI (rx-->tx)
+X (:,6,:) = LQI (tx-->rx)
+X (:,7,:) = LQI (rx-->tx)
+X (:,8:9,:) = tx (x_coord,y_coord) [m]
+X (:,10:11,:) = rx (x_coord,y_coord) [m]
+X (:,12,:) = distance [m] between tx and rx
+
+X = {fixed, mobile}
+
+####################
+# outdoor_data.mat #
+####################
+RSSI samples collected from 6 nodes (EXT ANT), 5 fixed and 1 mobile.
+fixed (320x12): inter-fixed-node data
+mobile (2080x12): mobile-fixed data
+
+X (:,1,:) = tx id
+X (:,2,:) = rx id
+X (:,3,:) = channel id
+X (:,4,:) = RSSI (tx-->rx)
+X (:,5,:) = RSSI (rx-->tx)
+X (:,6,:) = LQI (tx-->rx)
+X (:,7,:) = LQI (rx-->tx)
+X (:,8:9,:) = tx (x_coord,y_coord) [m]
+X (:,10:11,:) = rx (x_coord,y_coord) [m]
+X (:,12,:) = distance [m] between tx and rx
+
+X = {fixed, mobile}
