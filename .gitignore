@@ -1,0 +1,5 @@
+# Ignore byte compile python
+*.pyc
+
+# OS Generated Files
+.DS_Store?
