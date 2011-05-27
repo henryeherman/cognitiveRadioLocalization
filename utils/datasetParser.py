@@ -11,7 +11,7 @@ import sys
 import os
 import argparse
 from model.nodes import Nodes, Node
-from model.txrxevent import TXRXEvent, Events
+from model.txrxevent import TXRXEvent, EventList
 import csv
 
 parser = argparse.ArgumentParser(description="Read in dataset and generate nodes")
@@ -40,7 +40,7 @@ class DatasetParser(object):
     def __init__(self, filename):
         self.file = open(filename)
         self.nodes = Nodes()
-        self.events = Events()
+        self.events = EventList()
         self.__loadcsv()
         self.__getNodes()
         self.__getEvents()

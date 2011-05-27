@@ -10,43 +10,76 @@ Copyright (c) 2011 UCLA. All rights reserved.
 import sys
 import os
 import unittest
+import numpy as np
 
-class Events(object):
-    def __init__(self):
-        self.events = []
-        
-    def add(self, event):
-        self.events.append(event)
 
-    def __getitem__(self, index):
-        return self.events[index]
-    
+
+
+
+
+class EventList(list):
     def __repr__(self):
-        return "<Event(count=%d)>" % len(self.events)
-
+        return "<EventList(count=%d)>" % (len(self))
     def __str__(self):
-        return self.__repr__()    
+        return self.__repr__()
+       
+    def add(self, event):
+        self.append(event)
+       
+    def getrxpwr(self):
+        return np.array([e.rxpwr for e in self])
+    
+    def gettxpwr(self):
+        return np.array([e.txpwr for e in self])
+    
+    def getdistances(self):
+        return np.array([e.distance for e in self])
 
     def findTXEvents(self, nodeid):
-        tx = [r for r in self.events if r.rxnode.id==nodeid]
+        tx = [r for r in self if r.rxnode.id==nodeid]
         return EventList(tx)
 
     def findRXEvents(self, nodeid):
-        rx = [r for r in self.events if r.rxnode.id==nodeid]
+        rx = [r for r in self if r.rxnode.id==nodeid]
         return EventList(rx)
 
     def findTXRXEvents(self,rxnodeid,txnodeid):
-        txrx = [r for r in self.events if (r.rxnode.id==rxnodeid and r.txnode.id==txnodeid) ]
+        txrx = [r for r in self if (r.rxnode.id==rxnodeid and r.txnode.id==txnodeid) ]
         return EventList(txrx)
         
-class EventList(list):
-    def __init__(self, events):
-        self.events = events
-    def __repr__(self):
-        return "<EventList(count=%d)>" % (len(self.events))
-    def __str__(self):
-        return self.__repr__()
-
+    def findEventByDistance(self, distance):
+        es = [r for r in self if (r.distance==distance) ]
+        return EventList(es)
+    
+    def getAverageDistance(self):
+        return np.mean(self.distances)
+        
+    def getAverageRXpwr(self):
+        return np.mean(self.rxpwrs)
+    
+    def getAverageTXpwr(self):
+        return np.mean(self.txpwrs)
+    
+    
+    def getAvgRXPwrByDistance(self):
+        avgrxs = []
+        uniqueDistances = list(set(self.distances))
+        uniqueDistances.sort()
+        for distance in uniqueDistances:
+            es = self.findEventByDistance(distance)
+            avgrxs.append(es.avgrxpwr)
+        
+        return uniqueDistances, np.array(avgrxs)
+        
+        
+    rxpwrs = property(getrxpwr)
+    txpwrs = property(gettxpwr)
+    distances = property(getdistances)
+    avgdistance = property(getAverageDistance)
+    avgrxpwr = property(getAverageRXpwr)
+    avgtxpwr = property(getAverageTXpwr)
+    
+    
     
         
 class TXRXEvent(object):
@@ -62,6 +95,11 @@ class TXRXEvent(object):
         self.freq = float(carrierfreq)
         self.id = TXRXEvent.EVENTID
         self.id= TXRXEvent.EVENTID+1
+    
+    def getDistance(self):
+        return self.txnode.distanceFromNode(self.rxnode)
+        
+    distance = property(getDistance)    
         
     def __repr__(self):
         return "<TXRXEvent(id=%d,txnode=%d,rxnode=%d)>" % (self.id, self.txnode.id, self.rxnode.id)
@@ -69,7 +107,7 @@ class TXRXEvent(object):
     def __str__(self):
         return self.__repr__()
     
-
+    
 class TXRXTests(unittest.TestCase):
     def setUp(self):
         pass
