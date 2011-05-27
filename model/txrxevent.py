@@ -34,7 +34,7 @@ class EventList(list):
     
     def getpathlosses(self):
         pls = [r.pathloss for r in self]
-        return EventList(pls)
+        return np.array(pls)
 
     def getdistances(self):
         return np.array([e.distance for e in self])
@@ -63,7 +63,6 @@ class EventList(list):
     
     def getAverageTXpwr(self):
         return np.mean(self.txpwrs)
-    
     
     def getAvgRXPwrByDistance(self):
         avgrxs = []
