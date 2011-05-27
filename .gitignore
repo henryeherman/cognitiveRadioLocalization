@@ -3,3 +3,6 @@
 
 # OS Generated Files
 .DS_Store?
+
+# Ignore swap files
+*.swp
