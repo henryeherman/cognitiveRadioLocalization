@@ -32,6 +32,10 @@ class EventList(list):
     def gettxpwr(self):
         return np.array([e.txpwr for e in self])
     
+    def getpathlosses(self):
+        pls = [r.pathloss for r in self]
+        return EventList(pls)
+
     def getdistances(self):
         return np.array([e.distance for e in self])
 
@@ -78,7 +82,8 @@ class EventList(list):
     avgdistance = property(getAverageDistance)
     avgrxpwr = property(getAverageRXpwr)
     avgtxpwr = property(getAverageTXpwr)
-    
+    pathlosses = property(getpathlosses)
+
     
     
         
@@ -106,7 +111,11 @@ class TXRXEvent(object):
     
     def __str__(self):
         return self.__repr__()
+
+    def getPathLoss(self):
+        return self.txpwr - self.rxpwr
     
+    pathloss = property(getPathLoss)
     
 class TXRXTests(unittest.TestCase):
     def setUp(self):
