@@ -53,4 +53,5 @@ if __name__ == '__main__':
     pyplot.scatter(*results,c='r')
     pyplot.plot(*results, c='r')
     
-    raw_input("Press any key to exit") 
+    raw_input("Press key to exit"); 
+    
