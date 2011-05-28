@@ -37,20 +37,38 @@ if __name__ == '__main__':
 
     
     #diffpwr is txpwr-rxpwr
-    def estDistance(kappa, eta, diffpwr, d0=1):
-        return meter2cm(d0*np.exp((diffpwr+kappa)/(10.0*eta)))
+    def estDistance(kappa, eta, rxpwr, txpwr, d0=1.0):
+        return meter2cm(d0*np.exp((txpwr-rxpwr+kappa)/(10.0*eta)))
     
-    v0 = [-35.0, 2.0]
-    fp = lambda v,x: estDistance(v[0],v[1],x)
+    def estPwr(kappa, eta, d, ptx=4, d0=1.0):
+        return ptx+kappa-10*eta*np.log10(d/d0)
 
-    e = lambda v,x,y: (fp(v,x)-y)
+
+    v0 = [-35.0, 2.0]
+    fp = lambda v,x,y: estDistance(v[0],v[1],x,y)
+
+    e = lambda v,x,y,z: (fp(v,x,y)-z)
+
     fig1 = pyplot.figure(1)
     fig1.show()
-    for node in dp.nodes.nodes.values():
-        es = dp.events.findRXEvents(node.id);pyplot.scatter(es.distances,es.rxpwrs)
-        #raw_input("PAUSE")
-    results = dp.events.getAvgRXPwrByDistance()
-    pyplot.scatter(*results,c='r')
-    pyplot.plot(*results, c='r')
+
+    dps, rxp = dp.events.getAvgRXPwrByDistance()
+    dps, txp = dp.events.getAvgTXPwrByDistance()    
+    v, success = leastsq(e, v0, args=(rxp,txp,dps), maxfev=10000)
+    pyplot.figure(1)
+
+    ds = dp.events.distances
+    rxpwrs = dp.events.rxpwrs
+    pyplot.scatter(dp.events.distances, dp.events.rxpwrs)
+    pyplot.plot(dps, rxp, c='r')  
+    pyplot.scatter(dps,rxp,c='r')
+
     
+    ds = np.array(100,1000,5)
     
+    kappa, eta = v
+    
+    estrx = estPwr(kappa,eta,ds)
+
+    pyplot.plot(ds,estrx,c='g')
+

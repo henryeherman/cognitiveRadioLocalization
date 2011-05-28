@@ -63,7 +63,20 @@ class EventList(list):
     
     def getAverageTXpwr(self):
         return np.mean(self.txpwrs)
-    
+
+    def getAvgPathloss(self):
+        return np.mean(self.pathlosses)
+
+    def getAvgPathlossByDistance(self):
+        avgloss = []
+        uniqueDistances = list(set(self.distances))
+        uniqueDistances.sort()
+        for distance in uniqueDistances:
+            es = self.findEventByDistance(distance)
+            avgloss.append(es.avgpathloss)
+        
+        return uniqueDistances, np.array(avgloss)
+ 
     def getAvgRXPwrByDistance(self):
         avgrxs = []
         uniqueDistances = list(set(self.distances))
@@ -73,7 +86,18 @@ class EventList(list):
             avgrxs.append(es.avgrxpwr)
         
         return uniqueDistances, np.array(avgrxs)
+    
+    def getAvgTXPwrByDistance(self):
+        avgtxs = []
+        uniqueDistances = list(set(self.distances))
+        uniqueDistances.sort()
+        for distance in uniqueDistances:
+            es = self.findEventByDistance(distance)
+            avgtxs.append(es.avgtxpwr)
         
+        return uniqueDistances, np.array(avgtxs)
+       
+ 
         
     rxpwrs = property(getrxpwr)
     txpwrs = property(gettxpwr)
@@ -82,6 +106,7 @@ class EventList(list):
     avgrxpwr = property(getAverageRXpwr)
     avgtxpwr = property(getAverageTXpwr)
     pathlosses = property(getpathlosses)
+    avgpathloss = property(getAvgPathloss)
 
     
     
