@@ -9,33 +9,59 @@ Copyright (c) 2011 UCLA. All rights reserved.
 
 import sys
 import os
-from utils.units import meter2cm
-import numpy
+import shelve
+from utils.units import meter2cm, cm2meter
+import numpy as np
 from scipy import optimize
+from scipy.optimize import leastsq
+from matplotlib import pyplot
+from utils.logger import logger
+def estDistance(kappa, eta, rxpwr, txpwr, d0=1.0):
+    return meter2cm(d0*np.exp((txpwr-rxpwr+kappa)/(10.0*eta)))
+
+def estPwr(kappa, eta, d, ptx=4, d0=1.0):
+    d = cm2meter(d)
+    return ptx+kappa-10*eta*np.log(d/d0)
 
 
 class ChanParamEst(object):
-    def __init__(self, events, etabounds, kappabounds):
-        self.lowerEtaBound=etabounds[0]
-        self.upperEtaBound=etabounds[1]
-        self.upperKappaBound=kappabounds[1]
-        self.lowerKappaBound=kappabounds[0]
+    def __init__(self, events, estkappa=-35.0, esteta=2.0, maxloop=1000):
+        self.estkappa = estkappa
+        self.esteta = esteta
+        self.eta = self.esteta
+        self.kappa = self.estkappa
         self.events = events
-    
-    def getParams(self, txnode, rxnode):
-        e = self.events.findTXRXEventsByNode(txnode,rxnode)
-        return e
-    
-#diffpwr is txpwr-rxpwr
-def estDistance(kappa, eta, diffpwr, d0=1):
-    return meter2cm(d0*np.exp((diffpwr+K)/10*eta))
+        self.maxloop = maxloop
 
-v0 = [-35, 2]
-fp = lambda v, x: estDistance(v[0],v[1],x)
+        self.fp = lambda v,x,y: estDistance(v[0],v[1],x,y)
+        self.err = lambda v,x,y,z: (self.fp(v,x,y)-z)
+        self.v0 = [self.estkappa, self.esteta]
+        logger.info("Sorting By Distance")
+        self._sortByDistance()
+        logger.info("Calculating Optimized Parameters")
+        self._optimizeParams()
+            
+    def _sortByDistance(self): 
+        self.dps, self.rxp = self.events.getAvgRXPwrByDistance()
+        dps, self.txp = self.events.getAvgTXPwrByDistance()
+        
+    def _optimizeParams(self):
+        v, success = leastsq(self.err, self.v0, args=(self.rxp,self.txp,self.dps), maxfev=self.maxloop)
+        self.kappa = v[0]
+        self.eta = v[1]
 
-
-
+    def plot(self):
+        logger.info("Plotting Data")
+        self.fig1 = pyplot.figure(1)
+        self.fig1.show()
+        rxpwrs = self.events.rxpwrs
+        pyplot.scatter(self.events.distances, self.events.rxpwrs)
+        pyplot.plot(self.dps, self.rxp, c='r')  
+        pyplot.scatter(self.dps,self.rxp,c='r')
+        ds = np.arange(100,1300,5)
+        estrx = estPwr(self.kappa,self.eta,ds)
+        pyplot.plot(ds,estrx,c='g', linewidth=10)
 
 
 if __name__ == '__main__':
-    unittest.main()
+    pass

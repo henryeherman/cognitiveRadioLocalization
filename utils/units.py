@@ -11,6 +11,9 @@ import unittest
 def meter2cm(d):
     return d * 100.0
 
+def cm2meter(d):
+    return d / 100.0
+
 class UnitsTests(unittest.TestCase):
     def setUp(self):
 		pass
