@@ -11,6 +11,7 @@ import sys
 import os
 import unittest
 import numpy as np
+from utils.units import meter2cm
 
 class Nodes(object):
     def __init__(self, nodes =[]):
@@ -35,7 +36,23 @@ class Nodes(object):
 
     def __str__(self):
         return self.__repr__()    
+
+    def getExtents(self):
+        xs = np.array([n.xpos_cm for n in self.nodes.values()])
+        ys = np.array([n.ypos_cm for n in self.nodes.values()])
+        zs = np.array([n.zpos_cm for n in self.nodes.values()])
+        
+        xmax = np.max(xs)
+        ymax = np.max(ys)
+        zmax = np.max(zs)
+        xmin = np.min(xs)
+        ymin = np.min(ys)
+        zmin = np.min(zs)
+        
+        return ((xmax,xmin),(ymax,ymin),(zmax,zmin))
             
+    extents = property(getExtents)
+
 class Node(object):
     ID = 0
     def __init__(self, nodeid, xpos=0, ypos=0, zpos=0):
@@ -57,6 +74,10 @@ class Node(object):
 
     def getzpos_cm(self):
         return meter2cm(self.zpos)
+
+    def getPos(self):
+        return (self.xpos_cm, self.ypos_cm, self.zpos_cm)
+
 
     def distanceFromPos(self,xpos, ypos, zpos, incm=True):
         if incm is True:
@@ -84,10 +105,7 @@ class Node(object):
     xpos_cm = property(getxpos_cm)
     ypos_cm = property(getypos_cm)
     zpos_cm = property(getzpos_cm)
-
-def meter2cm(d):
-    return d * 100.0
-
+    pos = property(getPos)
 
 class NodesTests(unittest.TestCase):
     def setUp(self):

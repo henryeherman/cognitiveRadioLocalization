@@ -16,12 +16,8 @@ from scipy import optimize
 from scipy.optimize import leastsq
 from matplotlib import pyplot
 from utils.logger import logger
-def estDistance(kappa, eta, rxpwr, txpwr, d0=1.0):
-    return meter2cm(d0*np.exp((txpwr-rxpwr+kappa)/(10.0*eta)))
+from channelmodel import ChannelModel
 
-def estPwr(kappa, eta, d, ptx=4, d0=1.0):
-    d = cm2meter(d)
-    return ptx+kappa-10*eta*np.log(d/d0)
 
 
 class ChanParamEst(object):
@@ -33,7 +29,7 @@ class ChanParamEst(object):
         self.events = events
         self.maxloop = maxloop
 
-        self.fp = lambda v,x,y: estDistance(v[0],v[1],x,y)
+        self.fp = lambda v,x,y: ChannelModel.estDistance(v[0],v[1],x,y)
         self.err = lambda v,x,y,z: (self.fp(v,x,y)-z)
         self.v0 = [self.estkappa, self.esteta]
         logger.info("Sorting By Distance")
@@ -59,8 +55,8 @@ class ChanParamEst(object):
         pyplot.plot(self.dps, self.rxp, c='r')  
         pyplot.scatter(self.dps,self.rxp,c='r')
         ds = np.arange(100,1300,5)
-        estrx = estPwr(self.kappa,self.eta,ds)
-        pyplot.plot(ds,estrx,c='g', linewidth=10)
+        estrx = ChannelModel.estPwr(self.kappa,self.eta,ds)
+        pyplot.plot(ds,estrx,c='g', linewidth=3)
 
 
 if __name__ == '__main__':

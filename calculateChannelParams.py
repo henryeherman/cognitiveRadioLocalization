@@ -25,14 +25,12 @@ parser.add_argument('-o', '--output', dest='ofilename', action='store', required
 parser.add_argument('-p', '--plot', dest='doPlot', action='store_true', help="Plot Data and fitted curve")
 
 
-
 def main():
     args = parser.parse_args()
-    dp = DatasetParser(args.filename)
+    if not os.path.exists(args.filename):
+        parser.print_usage()
+        parser.exit(-1, "Dataset filename does not exist")
 
-
-if __name__ == '__main__':
-    args = parser.parse_args()
     dp = DatasetParser(args.filename)
     p = cpe.ChanParamEst(dp.events)
     
@@ -40,45 +38,21 @@ if __name__ == '__main__':
         p.plot()
         
     if args.ofilename is not None:
-        d = shelve.open(args.ofilename)
-        d['kappa'] = p.kappa
-        d['eta'] = p.eta
-        d.close()
-    """
-    def estDistance(kappa, eta, rxpwr, txpwr, d0=1.0):
-        return meter2cm(d0*np.exp((txpwr-rxpwr+kappa)/(10.0*eta)))
-    
-    def estPwr(kappa, eta, d, ptx=4, d0=1.0):
-        d = cm2meter(d)
-        return ptx+kappa-10*eta*np.log(d/d0)
-
-
-    v0 = [-50.0, 2.0]
-    fp = lambda v,x,y: estDistance(v[0],v[1],x,y)
-
-    e = lambda v,x,y,z: (fp(v,x,y)-z)
-
-    fig1 = pyplot.figure(1)
-    fig1.show()
-    
-    dps, rxp = dp.events.getAvgRXPwrByDistance()
-    dps, txp = dp.events.getAvgTXPwrByDistance()    
-    v, success = leastsq(e, v0, args=(rxp,txp,dps), maxfev=10000)
-
-    ds = dp.events.distances
-    rxpwrs = dp.events.rxpwrs
-    pyplot.scatter(dp.events.distances, dp.events.rxpwrs)
-    pyplot.plot(dps, rxp, c='r')  
-    pyplot.scatter(dps,rxp,c='r')
-
-    
-    ds = np.arange(100,1300,5)
-    
-    kappa, eta = v
-    
-    estrx = estPwr(kappa,eta,ds)
-    
-    pyplot.plot(ds,estrx,c='g', linewidth=5)
-    """
+        try:
+            d = shelve.open(args.ofilename)
+            d['kappa'] = p.kappa
+            d['eta'] = p.eta
+            d.close()
+        except:
+            parser.print_usage()
+            if os.path.exists(args.ofilename):            
+                msg = "File %s is not a valid parameter storage file" % args.ofilename
+            else:
+                msg = "Unknown persistant channel parameters failed for file %s" % args.ofilename
+            parser.exit(-1,msg)
+                
     print "KAPPA = %5.3f, ETA= %5.3f" % (p.kappa,p.eta) 
     raw_input("Press key to continue")
+
+if __name__ == '__main__':
+    main()

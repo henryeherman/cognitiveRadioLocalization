@@ -11,10 +11,7 @@ import sys
 import os
 import unittest
 import numpy as np
-
-
-
-
+from utils.logger import logger
 
 
 class EventList(list):
@@ -40,20 +37,21 @@ class EventList(list):
         return np.array([e.distance for e in self])
 
     def findTXEvents(self, nodeid):
-        tx = [r for r in self if r.rxnode.id==nodeid]
+        tx = [r for r in self if r.txnode.id==nodeid]
         return EventList(tx)
 
     def findRXEvents(self, nodeid):
         rx = [r for r in self if r.rxnode.id==nodeid]
         return EventList(rx)
 
-    def findTXRXEvents(self,rxnodeid,txnodeid):
+    def findRXTXEvents(self,rxnodeid,txnodeid):
         txrx = [r for r in self if (r.rxnode.id==rxnodeid and r.txnode.id==txnodeid) ]
         return EventList(txrx)
         
     def findEventByDistance(self, distance):
         es = [r for r in self if (r.distance==distance) ]
         return EventList(es)
+
     
     def getAverageDistance(self):
         return np.mean(self.distances)
@@ -71,6 +69,8 @@ class EventList(list):
         avgloss = []
         uniqueDistances = list(set(self.distances))
         uniqueDistances.sort()
+        logger.info("Found %d unique distances" % len(uniqueDistances))
+        logger.info("Calculating Average Pathloss for each distance") 
         for distance in uniqueDistances:
             es = self.findEventByDistance(distance)
             avgloss.append(es.avgpathloss)
@@ -81,6 +81,8 @@ class EventList(list):
         avgrxs = []
         uniqueDistances = list(set(self.distances))
         uniqueDistances.sort()
+        logger.info("Found %d unique distances" % len(uniqueDistances))
+        logger.info("Calculating Average RXPwr for each distance") 
         for distance in uniqueDistances:
             es = self.findEventByDistance(distance)
             avgrxs.append(es.avgrxpwr)
@@ -91,14 +93,21 @@ class EventList(list):
         avgtxs = []
         uniqueDistances = list(set(self.distances))
         uniqueDistances.sort()
+        logger.info("Found %d unique distances" % len(uniqueDistances))
+        logger.info("Calculating Average TXPwr for each distance") 
         for distance in uniqueDistances:
             es = self.findEventByDistance(distance)
             avgtxs.append(es.avgtxpwr)
         
         return uniqueDistances, np.array(avgtxs)
        
- 
+    def getRxNodes(self):
+        return list(set([e.rxnode for e in self]))
+
+    def getTxNodes(self):
+        return list(set([e.txnode for e in self]))
         
+
     rxpwrs = property(getrxpwr)
     txpwrs = property(gettxpwr)
     distances = property(getdistances)
@@ -107,6 +116,8 @@ class EventList(list):
     avgtxpwr = property(getAverageTXpwr)
     pathlosses = property(getpathlosses)
     avgpathloss = property(getAvgPathloss)
+    rxnodes = property(getRxNodes)
+    txnodes = property(getTxNodes)
 
     
     

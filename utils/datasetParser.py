@@ -13,10 +13,7 @@ import argparse
 from model.nodes import Nodes, Node
 from model.txrxevent import TXRXEvent, EventList
 import csv
-
-parser = argparse.ArgumentParser(description="Read in dataset and generate nodes")
-parser.add_argument('-f', '--filename', dest='filename', action='store', required=True)
-
+from logger import logger
 
 
 class DatasetParser(object):
@@ -72,7 +69,6 @@ class DatasetParser(object):
             self.nodes.add(node)
         self.file.seek(0)
     def __getEvents(self):
-        pass
 
         for line in self.csv:
             event = TXRXEvent(self.nodes.get(line[DatasetParser.TX]), self.nodes.get(line[DatasetParser.RX]),
@@ -84,14 +80,17 @@ class DatasetParser(object):
                             line[DatasetParser.FREQ])
             self.events.add(event)
         self.file.seek(0)
+        logger.info("Parsed %d events" % len(self.events))
         
         
 def main():
+    parser = argparse.ArgumentParser(description="Read in dataset and generate nodes")
+    parser.add_argument('-f', '--filename', dest='filename', action='store', required=True)
     args = parser.parse_args()
     datasetParser = DatasetParser(args.filename)
 
 
 if __name__ == '__main__':
-    args = parser.parse_args()
-    datasetParser = DatasetParser(args.filename)
+    main()
+
 
