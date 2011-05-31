@@ -88,6 +88,7 @@ class Node(object):
             myxpos = self.xpos
             myypos = self.ypos
             myzpos = self.zpos
+
         return np.sqrt( np.square(myxpos-xpos) + 
                         np.square(myypos-ypos) + 
                         np.square(myzpos-zpos) )    

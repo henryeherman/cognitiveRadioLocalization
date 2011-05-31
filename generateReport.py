@@ -27,6 +27,7 @@ from model.fields import Field
 from utils.images2gif import writeGif
 from PIL import Image
 from scipy import ndimage
+from model.multilaterationReport import Report
 
 parser = argparse.ArgumentParser(description="Read in dataset and generate nodes")
 parser.add_argument('-f', '--filename', dest='filename', action='store', required=True)
@@ -40,6 +41,13 @@ parser.add_argument('--disp', dest="display", action="store_true", default=False
 def main():
     pass
 
+def plotReport(rep):
+    pyplot.figure(1)
+    pyplot.imshow(rep.raw_report,origin=(0,0))
+    pyplot.figure(2)
+    pyplot.imshow(rep.drawRegion(25),origin=(0,0))
+    pyplot.figure(3)
+    pyplot.imshow(rep.field.drawNodesAndRadii(rep.rxnodes, rep.radii, rep.txnode),origin=(0,0))
 
 if __name__ == '__main__':
     args = parser.parse_args()
@@ -61,7 +69,6 @@ if __name__ == '__main__':
         kappa = p.kappa
         eta = p.eta 
     print "KAPPA = %5.3f, ETA= %5.3f" % (kappa,eta) 
-    raw_input("Press key to continue")
 
 
     cm = ChannelModel(kappa, eta)
@@ -75,7 +82,7 @@ if __name__ == '__main__':
     else:
         txnodes = [dp.nodes[args.txnodeid].id]
 
-    raw_reports = dict()
+    reports = dict()
 
     for txnodeid in txnodes:
         radii=[]
@@ -87,30 +94,24 @@ if __name__ == '__main__':
             events = txevents.findRXEvents(rxnodeid)
             nodes.append(dp.nodes[rxnodeid])
             r = radiusCalc.getRadiusFromEvents(events)
-            if not r is None:
-                radii.append(r)
-                rimg = np.asarray(field.drawRadii([r]))
-                radius_imgs.append(rimg)
-                rimg=rimg/rimg.max()
-                rimg=1-rimg
-                dist_img = ndimage.distance_transform_edt(rimg)
-                dist_imgs.append(np.power(dist_img,2))
+            radii.append(r)
         try:
-            rep = np.zeros_like(dist_imgs[0])
-            for dist_img in dist_imgs:
-                rep = rep + dist_img
-            raw_reports[txnodeid] = rep                               
-        except IndexError:
-            pass
-        img = field.drawNodesAndRadii(nodes, radii, dp.nodes[txnodeid])
-        imgs.append(img)   
-    pyplot.ion() 
-    if args.display:
-        for txid in txnodes:
-            pyplot.figure(1)
-            pyplot.imshow(field.drawNodes([dp.nodes[txid]]))
-            pyplot.figure(2)
-            pyplot.imshow(raw_reports[txid])
-            pyplot.draw()
-            time.sleep(0.5)
+            if not len(radii) == 0: 
+                rep = Report(field,radii)
+                reports[txnodeid] = rep    
+                img = field.drawNodesAndRadii(nodes, radii, dp.nodes[txnodeid])
+                imgs.append(img)
+        except:
+            pass   
+    
 
+    raw_input("Press key to continue")
+    if args.display:
+        pyplot.ion()
+        for txid in txnodes:
+            try:
+                plotReport(reports[txid])
+                pyplot.draw()
+                time.sleep(0.5)
+            except KeyError:
+                pass

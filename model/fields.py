@@ -18,7 +18,7 @@ import random
 
 class Field(object):
     NR = 20 
-    def __init__(self, nodes, padding=100):
+    def __init__(self, nodes, padding=200):
         self.nodes = nodes
         
         self.extents = self.nodes.extents
@@ -51,7 +51,7 @@ class Field(object):
             y = np.int16(np.floor(y))
             rad = np.int16(np.round(r.r))
             draw.arc((x-rad,y-rad,x+rad,y+rad), 0,360,255)
-        return self._img
+        return np.asarray(self._img)
 
 
     def drawNodes(self, nodes=[]):
@@ -65,7 +65,7 @@ class Field(object):
             draw.ellipse((x-Field.NR,y-Field.NR,x+Field.NR,y+Field.NR),
                             (val1,val2,val3)) 
             draw.text((x,y),"%d"%node.id)
-        return self._cimg
+        return np.asarray(self._cimg)
 
 
     def drawNodesAndRadii(self, nodes=[], radii=[], txnode=None):
@@ -97,7 +97,24 @@ class Field(object):
 
          
 
-        return self._cimg
+        return np.asarray(self._cimg)
+
+    def drawTXRegion(self,pos,size):
+        draw = ImageDraw.Draw(self.cimg)
+        x,y = pos
+        x,y = self._conv_coord(x,y)
+        x = np.int16(np.floor(x))
+        y = np.int16(np.floor(y))
+        logger.info("x:%f,y:%f" % (x,y))
+        draw.rectangle((x-size,y-size,x+size,y+size),
+        outline=(255,255,0), fill=(255,0,255))
+        
+        draw.text((x-size/2,y-size/2), "Rep")
+        return np.asarray(self._cimg)
+        
+
+    def _conv_coord(self,x,y):
+        return x+self.pad, y+self.pad
 
     def _conv_node(self,node):
         x,y,z = node.pos
