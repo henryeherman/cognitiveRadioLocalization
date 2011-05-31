@@ -33,6 +33,8 @@ parser.add_argument('-l', '--loadParams', dest='paramfilename', action='store', 
 parser.add_argument('rxnodes', metavar='N', type=int, nargs='+',
                     help='RX node ids to include in super sensor')
 parser.add_argument('-t', '--tx', dest='txnodeid', type=int, action='store', help="Selected TX Node", required=False, default=None)
+parser.add_argument('--disp', dest="display", action="store_true", default=False, help="Diplay animations")
+
 
 def main():
     pass
@@ -89,23 +91,24 @@ if __name__ == '__main__':
     
     writeGif("out.gif",imgs,0.5,True,False)
     img = Image.open("out.gif")
+    if args.display:
+        
+        root = Tkinter.Tk()
 
-    root = Tkinter.Tk()
-
-    img1 = ImageTk.PhotoImage(imgs[0])
-    width1 = img1.width()
-    height1= img1.height()
-    canvas1 = Tkinter.Canvas(width=width1, height=height1)
-    canvas1.pack()
+        img1 = ImageTk.PhotoImage(imgs[0])
+        width1 = img1.width()
+        height1= img1.height()
+        canvas1 = Tkinter.Canvas(width=width1, height=height1)
+        canvas1.pack()
     
     
-    for i in imgs:
-        tki = ImageTk.PhotoImage(i)
-        canvas1.create_image(width1/2.0,height1/2.0, image=tki)
-        canvas1.update()
-        time.sleep(0.5)
+        for i in imgs:
+            tki = ImageTk.PhotoImage(i)
+            canvas1.create_image(width1/2.0,height1/2.0, image=tki)
+            canvas1.update()
+            time.sleep(0.5)
 
-    root.mainloop()
+        root.mainloop()
 
 
 
