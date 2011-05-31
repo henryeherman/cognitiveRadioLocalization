@@ -33,8 +33,15 @@ class Radius(object):
     
     def getPos(self):
         return self.rxnode.pos
-
+    def getActualRadius(self):
+        return self.rxnode.distanceFromNode(self.txnode)
+    
+    def calcError(self):
+        return self.actualRadius - self.r
+ 
+    error = property(calcError)
     pos = property(getPos)
+    actualRadius = property(getActualRadius)
 
 class RadiusCalculator(object):
 

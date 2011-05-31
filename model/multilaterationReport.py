@@ -27,7 +27,6 @@ from model.fields import Field
 from utils.images2gif import writeGif
 from PIL import Image
 from scipy import ndimage
-import Tkinter, ImageTk
 
 parser = argparse.ArgumentParser(description="Read in dataset and generate nodes")
 parser.add_argument('-f', '--filename', dest='filename', action='store', required=True)
@@ -76,43 +75,42 @@ if __name__ == '__main__':
     else:
         txnodes = [dp.nodes[args.txnodeid].id]
 
+    raw_reports = dict()
+
     for txnodeid in txnodes:
         radii=[]
         nodes=[]
+        radius_imgs = []
+        dist_imgs =[]
         txevents = dp.events.findTXEvents(txnodeid)
         for rxnodeid in args.rxnodes:
             events = txevents.findRXEvents(rxnodeid)
             nodes.append(dp.nodes[rxnodeid])
             r = radiusCalc.getRadiusFromEvents(events)
-
-    
             if not r is None:
                 radii.append(r)
+                rimg = np.asarray(field.drawRadii([r]))
+                radius_imgs.append(rimg)
+                rimg=rimg/rimg.max()
+                rimg=1-rimg
+                dist_img = ndimage.distance_transform_edt(rimg)
+                dist_imgs.append(np.power(dist_img,2))
+        try:
+            rep = np.zeros_like(dist_imgs[0])
+            for dist_img in dist_imgs:
+                rep = rep + dist_img
+            raw_reports[txnodeid] = rep                               
+        except IndexError:
+            pass
         img = field.drawNodesAndRadii(nodes, radii, dp.nodes[txnodeid])
-        dimg = field.drawRadii(radii)
         imgs.append(img)   
-        dimgs.append(dimg)
-    
-    writeGif("out.gif",imgs,0.5,True,False)
-    img = Image.open("out.gif")
-    if args.display and (platform.system() == 'Linux'):
-        
-        root = Tkinter.Tk()
-
-        img1 = ImageTk.PhotoImage(imgs[0])
-        width1 = img1.width()
-        height1= img1.height()
-        canvas1 = Tkinter.Canvas(width=width1, height=height1)
-        canvas1.pack()
-    
-    
-        for i in imgs:
-            tki = ImageTk.PhotoImage(i)
-            canvas1.create_image(width1/2.0,height1/2.0, image=tki)
-            canvas1.update()
+    pyplot.ion() 
+    if args.display:
+        for txid in txnodes:
+            pyplot.figure(1)
+            pyplot.imshow(field.drawNodes([dp.nodes[txid]]))
+            pyplot.figure(2)
+            pyplot.imshow(raw_reports[txid])
+            pyplot.draw()
             time.sleep(0.5)
-
-        root.mainloop()
-
-
 
