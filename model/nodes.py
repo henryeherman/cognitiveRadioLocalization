@@ -53,6 +53,8 @@ class Nodes(object):
             
     extents = property(getExtents)
 
+        
+
 class Node(object):
     ID = 0
     def __init__(self, nodeid, xpos=0, ypos=0, zpos=0):

@@ -105,7 +105,6 @@ if __name__ == '__main__':
             pass   
     
 
-    raw_input("Press key to continue")
     if args.display:
         pyplot.ion()
         for txid in txnodes:
@@ -115,3 +114,4 @@ if __name__ == '__main__':
                 time.sleep(0.5)
             except KeyError:
                 pass
+    raw_input("Press key to continue")

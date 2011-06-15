@@ -47,7 +47,13 @@ class EventList(list):
     def findRXTXEvents(self,rxnodeid,txnodeid):
         txrx = [r for r in self if (r.rxnode.id==rxnodeid and r.txnode.id==txnodeid) ]
         return EventList(txrx)
-        
+
+    def findRXListTXEvents(self, rxnodeids, txnodeid):
+        temp = EventList()
+        for rxnodeid in rxnodeids:
+            temp.extend(self.findRXTXEvents(rxnodeid, txnodeid))
+        return EventList(temp)       
+
     def findEventByDistance(self, distance):
         es = [r for r in self if (r.distance==distance) ]
         return EventList(es)
@@ -108,17 +114,31 @@ class EventList(list):
         return list(set([e.txnode for e in self]))
         
 
+    def getRSSI(self):
+        return np.array([e.rssi for e in self])
+
+    def getAverageRSSI(self):
+        return np.mean(self.rssi)
+
+    def normalizeRssi(self):
+        for node in self.rxnodes:
+            es = self.findRXEvents(node.id)
+            rssiMax = es.rssi.max()
+            for e in es:
+                e.rssi = e.rssi/rssiMax
+
     rxpwrs = property(getrxpwr)
     txpwrs = property(gettxpwr)
     distances = property(getdistances)
     avgdistance = property(getAverageDistance)
     avgrxpwr = property(getAverageRXpwr)
     avgtxpwr = property(getAverageTXpwr)
+    avgrssi = property(getAverageRSSI)
     pathlosses = property(getpathlosses)
     avgpathloss = property(getAvgPathloss)
     rxnodes = property(getRxNodes)
     txnodes = property(getTxNodes)
-
+    rssi = property(getRSSI)
     
     
         
